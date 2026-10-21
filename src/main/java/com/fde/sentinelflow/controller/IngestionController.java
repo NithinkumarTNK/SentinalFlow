@@ -1,6 +1,7 @@
 package com.fde.sentinelflow.controller;
 
 import com.fde.sentinelflow.model.ApiKey;
+import com.fde.sentinelflow.repository.ApiKeyRepository;
 import com.fde.sentinelflow.service.ApiKeyAuthService;
 import com.fde.sentinelflow.service.KafkaEventProducer;
 import com.fde.sentinelflow.service.RateLimiterService;
@@ -20,13 +21,15 @@ public class IngestionController {
     private final ApiKeyAuthService authService;
     private final RateLimiterService rateLimiterService;
     private final KafkaEventProducer kafkaEventProducer;
+    private final ApiKeyRepository apiKeyRepository;
 
     public IngestionController(ApiKeyAuthService authService,
                                RateLimiterService rateLimiterService,
-                               KafkaEventProducer kafkaEventProducer) {
+                               KafkaEventProducer kafkaEventProducer, ApiKeyRepository apiKeyRepository) {
         this.authService = authService;
         this.rateLimiterService = rateLimiterService;
         this.kafkaEventProducer = kafkaEventProducer;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @PostMapping("/events")
@@ -52,7 +55,15 @@ public class IngestionController {
 
         return ResponseEntity.accepted().body(new IngestionResponse("SUCCESS", "Event accepted and queued for processing"));
     }
+    // Example snippet inside your IngestionController or Security Interceptor
+    public boolean hasPermission(String apiKey, String requiredScope) {
+        // Look up key from Redis or PostgreSQL cache and check if scopes contain requiredScope
+        return apiKeyRepository.findByKeyHash(apiKey)
+                .map(key -> key.getScopes().contains(requiredScope))
+                .orElse(false);
+    }
 }
+
 
 record AuditEventRequest(
         @NotBlank String eventType,

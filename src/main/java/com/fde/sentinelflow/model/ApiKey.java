@@ -22,6 +22,9 @@ public class ApiKey {
     @Column(name = "key_prefix", nullable = false)
     private String keyPrefix;
 
+    @Column(name = "scopes", nullable = false)
+    private String scopes;
+
     private String name;
 
     @Column(name = "is_active")
@@ -45,5 +48,9 @@ public class ApiKey {
 
     public boolean isActive() {
         return isActive;
+    }
+
+    public String getScopes() {
+        return scopes;
     }
 }

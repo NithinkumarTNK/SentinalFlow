@@ -1,4 +1,6 @@
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   application:
     name: sentinelflow
   datasource:
@@ -18,3 +20,17 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    listener:
+      # Ensures listener container waits for active messages to finish before stopping
+      ack-mode: record
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health, metrics, prometheus
+    endpoint:
+      health:
+        show-details: always
+    metrics:
+      tags:
+        application: sentinelflow
